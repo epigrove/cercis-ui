@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/epiphanygrove/cercis-ui/spec/schema.json",
+  "$id": "https://github.com/epigrove/cercis-ui/spec/schema.json",
   "title": "Cercis 插件界面图样 v1",
   "description": "插件界面的机器可读描述。规范正文见 spec/v1.md。",
   "type": "object",
