@@ -1,0 +1,86 @@
+{
+  "spec": "cercis.ui/1",
+  "title": { "zh": "项目体检", "en": "Health check" },
+  "root": {
+    "type": "panel",
+    "title": { "zh": "项目体检", "en": "Health check" },
+    "children": [
+      {
+        "type": "stack",
+        "direction": "row",
+        "gap": "small",
+        "children": [
+          {
+            "type": "badge",
+            "tone": "error",
+            "value": {
+              "zh": "问题 {summary.errors}",
+              "en": "Errors {summary.errors}"
+            }
+          },
+          {
+            "type": "badge",
+            "tone": "warn",
+            "value": {
+              "zh": "提醒 {summary.warnings}",
+              "en": "Warnings {summary.warnings}"
+            }
+          },
+          {
+            "type": "badge",
+            "tone": "info",
+            "value": { "zh": "提示 {summary.infos}", "en": "Notes {summary.infos}" }
+          }
+        ]
+      },
+      {
+        "type": "notice",
+        "tone": "success",
+        "when": { "path": "$result.summary.errors", "equals": 0 },
+        "value": {
+          "zh": "体检通过，没有必须处理的问题。",
+          "en": "All clear — nothing needs fixing."
+        }
+      },
+      {
+        "type": "section",
+        "title": { "zh": "问题明细", "en": "Findings" },
+        "children": [
+          {
+            "type": "table",
+            "rowsFrom": "$result.findings",
+            "emptyText": { "zh": "未发现问题。", "en": "No findings." },
+            "columns": [
+              {
+                "name": "level",
+                "label": { "zh": "级别", "en": "Level" },
+                "toneFrom": "level"
+              },
+              {
+                "name": "target",
+                "label": { "zh": "位置", "en": "Where" }
+              },
+              {
+                "name": "message",
+                "label": { "zh": "说明", "en": "What" },
+                "binding": { "zh": "message_cn", "en": "message_en" }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "stack",
+        "direction": "row",
+        "children": [
+          {
+            "type": "button",
+            "command": "",
+            "emphasis": "secondary",
+            "label": { "zh": "重新体检", "en": "Run again" }
+          }
+        ]
+      }
+    ]
+  }
+}

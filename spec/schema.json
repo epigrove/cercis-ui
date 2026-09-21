@@ -1,0 +1,436 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/epiphanygrove/cercis-ui/spec/schema.json",
+  "title": "Cercis 插件界面图样 v1",
+  "description": "插件界面的机器可读描述。规范正文见 spec/v1.md。",
+  "type": "object",
+  "required": ["spec", "root"],
+  "properties": {
+    "spec": { "const": "cercis.ui/1" },
+    "title": { "$ref": "#/$defs/text" },
+    "root": { "$ref": "#/$defs/node" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "text": {
+      "description": "文字：直接给字符串，或给中英双语",
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "required": ["zh"],
+          "properties": {
+            "zh": { "type": "string" },
+            "en": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "binding": {
+      "description": "数据绑定：$result.* / $form.* / $project.*",
+      "type": "string",
+      "pattern": "^\\$(result|form|project)(\\.[A-Za-z0-9_]+)*$"
+    },
+    "condition": {
+      "type": "object",
+      "required": ["path"],
+      "properties": {
+        "path": { "$ref": "#/$defs/binding" },
+        "equals": {},
+        "notEquals": {},
+        "exists": { "type": "boolean" },
+        "gt": { "type": "number" },
+        "lt": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "when": {
+      "oneOf": [
+        { "$ref": "#/$defs/condition" },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/condition" }
+        }
+      ]
+    },
+    "tone": { "enum": ["neutral", "info", "success", "warn", "error"] },
+    "emphasis": { "enum": ["primary", "secondary", "danger"] },
+    "gap": { "enum": ["none", "small", "medium", "large"] },
+    "column": {
+      "type": "object",
+      "required": ["name", "label"],
+      "properties": {
+        "name": { "type": "string" },
+        "label": { "$ref": "#/$defs/text" },
+        "binding": {
+          "description": "该列取行里的哪个字段；中英不同名时给双语",
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "object",
+              "properties": {
+                "zh": { "type": "string" },
+                "en": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "toneFrom": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "option": {
+      "type": "object",
+      "required": ["value", "label"],
+      "properties": {
+        "value": { "type": "string" },
+        "label": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "node": {
+      "oneOf": [
+        { "$ref": "#/$defs/panel" },
+        { "$ref": "#/$defs/card" },
+        { "$ref": "#/$defs/section" },
+        { "$ref": "#/$defs/stack" },
+        { "$ref": "#/$defs/split" },
+        { "$ref": "#/$defs/grid" },
+        { "$ref": "#/$defs/tabs" },
+        { "$ref": "#/$defs/tab" },
+        { "$ref": "#/$defs/text_node" },
+        { "$ref": "#/$defs/badge" },
+        { "$ref": "#/$defs/notice" },
+        { "$ref": "#/$defs/table" },
+        { "$ref": "#/$defs/list" },
+        { "$ref": "#/$defs/keyvalue" },
+        { "$ref": "#/$defs/image" },
+        { "$ref": "#/$defs/progress" },
+        { "$ref": "#/$defs/divider" },
+        { "$ref": "#/$defs/form" },
+        { "$ref": "#/$defs/field" },
+        { "$ref": "#/$defs/file" },
+        { "$ref": "#/$defs/button" }
+      ]
+    },
+    "children": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "panel": {
+      "type": "object",
+      "required": ["type", "children"],
+      "properties": {
+        "type": { "const": "panel" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "title": { "$ref": "#/$defs/text" },
+        "children": { "$ref": "#/$defs/children" }
+      },
+      "additionalProperties": false
+    },
+    "card": {
+      "type": "object",
+      "required": ["type", "children"],
+      "properties": {
+        "type": { "const": "card" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "title": { "$ref": "#/$defs/text" },
+        "children": { "$ref": "#/$defs/children" }
+      },
+      "additionalProperties": false
+    },
+    "section": {
+      "type": "object",
+      "required": ["type", "children"],
+      "properties": {
+        "type": { "const": "section" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "title": { "$ref": "#/$defs/text" },
+        "collapsed": { "type": "boolean" },
+        "children": { "$ref": "#/$defs/children" }
+      },
+      "additionalProperties": false
+    },
+    "stack": {
+      "type": "object",
+      "required": ["type", "children"],
+      "properties": {
+        "type": { "const": "stack" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "direction": { "enum": ["row", "column"] },
+        "gap": { "$ref": "#/$defs/gap" },
+        "children": { "$ref": "#/$defs/children" }
+      },
+      "additionalProperties": false
+    },
+    "split": {
+      "type": "object",
+      "required": ["type", "children"],
+      "properties": {
+        "type": { "const": "split" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "ratio": { "type": "number", "minimum": 0.1, "maximum": 0.9 },
+        "children": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "$ref": "#/$defs/node" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "grid": {
+      "type": "object",
+      "required": ["type", "children"],
+      "properties": {
+        "type": { "const": "grid" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "columns": { "type": "integer", "minimum": 1, "maximum": 6 },
+        "children": { "$ref": "#/$defs/children" }
+      },
+      "additionalProperties": false
+    },
+    "tabs": {
+      "type": "object",
+      "required": ["type", "children"],
+      "properties": {
+        "type": { "const": "tabs" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/tab" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "tab": {
+      "type": "object",
+      "required": ["type", "label", "children"],
+      "properties": {
+        "type": { "const": "tab" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "label": { "$ref": "#/$defs/text" },
+        "children": { "$ref": "#/$defs/children" }
+      },
+      "additionalProperties": false
+    },
+    "text_node": {
+      "type": "object",
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "const": "text" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "value": { "$ref": "#/$defs/text" },
+        "variant": {
+          "enum": ["heading", "subheading", "body", "caption", "code"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "badge": {
+      "type": "object",
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "const": "badge" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "value": { "$ref": "#/$defs/text" },
+        "tone": { "$ref": "#/$defs/tone" }
+      },
+      "additionalProperties": false
+    },
+    "notice": {
+      "type": "object",
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "const": "notice" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "value": { "$ref": "#/$defs/text" },
+        "tone": { "$ref": "#/$defs/tone" }
+      },
+      "additionalProperties": false
+    },
+    "table": {
+      "type": "object",
+      "required": ["type", "columns", "rowsFrom"],
+      "properties": {
+        "type": { "const": "table" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "columns": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/column" }
+        },
+        "rowsFrom": { "$ref": "#/$defs/binding" },
+        "emptyText": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "list": {
+      "type": "object",
+      "required": ["type", "itemsFrom", "item"],
+      "properties": {
+        "type": { "const": "list" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "itemsFrom": { "$ref": "#/$defs/binding" },
+        "item": { "$ref": "#/$defs/node" },
+        "emptyText": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "keyvalue": {
+      "type": "object",
+      "required": ["type", "items"],
+      "properties": {
+        "type": { "const": "keyvalue" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["key", "valueFrom"],
+            "properties": {
+              "key": { "$ref": "#/$defs/text" },
+              "valueFrom": { "$ref": "#/$defs/binding" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "image": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "image" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "src": { "type": "string" },
+        "srcFrom": { "$ref": "#/$defs/binding" },
+        "alt": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "progress": {
+      "type": "object",
+      "required": ["type", "valueFrom"],
+      "properties": {
+        "type": { "const": "progress" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "valueFrom": { "$ref": "#/$defs/binding" },
+        "max": { "type": "number", "exclusiveMinimum": 0 },
+        "label": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "divider": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "divider" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" }
+      },
+      "additionalProperties": false
+    },
+    "form": {
+      "type": "object",
+      "required": ["type", "name", "children"],
+      "properties": {
+        "type": { "const": "form" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "name": { "type": "string" },
+        "children": { "$ref": "#/$defs/children" }
+      },
+      "additionalProperties": false
+    },
+    "field": {
+      "type": "object",
+      "required": ["type", "name", "kind", "label"],
+      "properties": {
+        "type": { "const": "field" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "name": { "type": "string" },
+        "kind": {
+          "enum": [
+            "text",
+            "number",
+            "date",
+            "textarea",
+            "select",
+            "checkbox",
+            "radio"
+          ]
+        },
+        "label": { "$ref": "#/$defs/text" },
+        "required": { "type": "boolean" },
+        "placeholder": { "$ref": "#/$defs/text" },
+        "help": { "$ref": "#/$defs/text" },
+        "default": { "type": "string" },
+        "options": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/option" }
+        },
+        "optionsFrom": { "$ref": "#/$defs/binding" }
+      },
+      "additionalProperties": false
+    },
+    "file": {
+      "type": "object",
+      "required": ["type", "name", "label"],
+      "properties": {
+        "type": { "const": "file" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "name": { "type": "string" },
+        "label": { "$ref": "#/$defs/text" },
+        "accept": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "required": { "type": "boolean" },
+        "help": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    },
+    "button": {
+      "type": "object",
+      "required": ["type", "label", "command"],
+      "properties": {
+        "type": { "const": "button" },
+        "id": { "type": "string" },
+        "when": { "$ref": "#/$defs/when" },
+        "label": { "$ref": "#/$defs/text" },
+        "command": { "type": "string" },
+        "args": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "emphasis": { "$ref": "#/$defs/emphasis" },
+        "confirm": { "$ref": "#/$defs/text" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

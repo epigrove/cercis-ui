@@ -1,0 +1,33 @@
+<!--
+  示例：通用体检插件的体检报告（作者写法）
+  编译命令（规划中）：cercis-ui compile health-report.html -o health-report.json
+-->
+<cercis-panel title="{zh: 项目体检, en: Health check}">
+  <cercis-stack direction="row" gap="small">
+    <cercis-badge tone="error"
+      value="{zh: 问题 {summary.errors}, en: Errors {summary.errors}}" />
+    <cercis-badge tone="warn"
+      value="{zh: 提醒 {summary.warnings}, en: Warnings {summary.warnings}}" />
+    <cercis-badge tone="info"
+      value="{zh: 提示 {summary.infos}, en: Notes {summary.infos}}" />
+  </cercis-stack>
+
+  <cercis-notice tone="success"
+    when-path="$result.summary.errors" when-equals="0"
+    value="{zh: 体检通过，没有必须处理的问题。, en: All clear — nothing needs fixing.}" />
+
+  <cercis-section title="{zh: 问题明细, en: Findings}">
+    <cercis-table rows-from="$result.findings"
+      empty-text="{zh: 未发现问题。, en: No findings.}">
+      <cercis-column name="level" label="{zh: 级别, en: Level}" tone-from="level" />
+      <cercis-column name="target" label="{zh: 位置, en: Where}" />
+      <cercis-column name="message" label="{zh: 说明, en: What}"
+        binding="{zh: message_cn, en: message_en}" />
+    </cercis-table>
+  </cercis-section>
+
+  <cercis-stack direction="row">
+    <cercis-button command="" emphasis="secondary"
+      label="{zh: 重新体检, en: Run again}" />
+  </cercis-stack>
+</cercis-panel>

@@ -1,0 +1,108 @@
+{
+  "spec": "cercis.ui/1",
+  "title": { "zh": "导入 CSV", "en": "Import CSV" },
+  "root": {
+    "type": "panel",
+    "title": { "zh": "导入 CSV", "en": "Import CSV" },
+    "children": [
+      {
+        "type": "text",
+        "variant": "body",
+        "value": {
+          "zh": "选一个 CSV 文件，先试运行看看会发生什么，确认无误再写入。",
+          "en": "Pick a CSV file, preview what will happen, then confirm to write."
+        }
+      },
+      {
+        "type": "form",
+        "name": "import",
+        "children": [
+          {
+            "type": "field",
+            "name": "table",
+            "kind": "select",
+            "required": true,
+            "label": { "zh": "目标表", "en": "Target table" },
+            "optionsFrom": "$project.tables"
+          },
+          {
+            "type": "file",
+            "name": "file",
+            "required": true,
+            "accept": [".csv", ".tsv"],
+            "label": { "zh": "CSV 文件", "en": "CSV file" },
+            "help": {
+              "zh": "首行是列名；Excel 请先另存为 CSV",
+              "en": "First row holds column names"
+            }
+          },
+          {
+            "type": "field",
+            "name": "skip_unknown",
+            "kind": "checkbox",
+            "label": { "zh": "忽略源文件里多余的列", "en": "Skip extra columns" }
+          },
+          {
+            "type": "stack",
+            "direction": "row",
+            "gap": "small",
+            "children": [
+              {
+                "type": "button",
+                "command": "import",
+                "emphasis": "secondary",
+                "label": { "zh": "试运行", "en": "Preview" },
+                "args": ["--table", "$form.table", "--file", "$form.file", "--dry-run"]
+              },
+              {
+                "type": "button",
+                "command": "import",
+                "emphasis": "primary",
+                "label": { "zh": "确认导入", "en": "Import now" },
+                "args": ["--table", "$form.table", "--file", "$form.file"],
+                "confirm": {
+                  "zh": "确认把这批数据写进项目吗？写入后可以更正，但不会删除原值。",
+                  "en": "Write this batch into the project? Corrections are possible, deletion is not."
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "notice",
+        "tone": "info",
+        "when": { "path": "$result.dry_run", "equals": true },
+        "value": {
+          "zh": "试运行通过，没有写入任何数据。",
+          "en": "Preview passed — nothing was written."
+        }
+      },
+      {
+        "type": "notice",
+        "tone": "success",
+        "when": { "path": "$result.rows_imported", "exists": true },
+        "value": {
+          "zh": "已导入 {rows_imported} 行，批次号 {batch_id}。",
+          "en": "Imported {rows_imported} rows (batch {batch_id})."
+        }
+      },
+      {
+        "type": "section",
+        "title": { "zh": "列映射", "en": "Column mapping" },
+        "when": { "path": "$result.mapping", "exists": true },
+        "children": [
+          {
+            "type": "table",
+            "rowsFrom": "$result.mapping",
+            "emptyText": { "zh": "没有需要映射的列。", "en": "Nothing to map." },
+            "columns": [
+              { "name": "from", "label": { "zh": "源列", "en": "Source" } },
+              { "name": "to", "label": { "zh": "目标列", "en": "Target" } }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+<!--
+  示例：通用导入导出插件的「导入 CSV」向导（作者写法）
+  编译命令（规划中）：cercis-ui compile import-csv.html -o import-csv.json
+
+  规则：只能用规范 §4 的积木；不写样式、不写脚本、不写逻辑。
+-->
+<cercis-panel title="{zh: 导入 CSV, en: Import CSV}">
+  <cercis-text variant="body"
+    value="{zh: 选一个 CSV 文件，先试运行看看会发生什么，确认无误再写入。,
+            en: Pick a CSV file, preview what will happen, then confirm to write.}" />
+
+  <cercis-form name="import">
+    <cercis-field name="table" kind="select" required="true"
+      label="{zh: 目标表, en: Target table}"
+      options-from="$project.tables" />
+    <cercis-file name="file" required="true" accept=".csv,.tsv"
+      label="{zh: CSV 文件, en: CSV file}"
+      help="{zh: 首行是列名；Excel 请先另存为 CSV, en: First row holds column names}" />
+    <cercis-field name="skip_unknown" kind="checkbox"
+      label="{zh: 忽略源文件里多余的列, en: Skip extra columns}" />
+
+    <cercis-stack direction="row">
+      <cercis-button command="import" emphasis="secondary"
+        label="{zh: 试运行, en: Preview}"
+        args="--table $form.table --file $form.file --dry-run" />
+      <cercis-button command="import" emphasis="primary"
+        label="{zh: 确认导入, en: Import now}"
+        args="--table $form.table --file $form.file"
+        confirm="{zh: 确认把这批数据写进项目吗？写入后可以更正，但不会删除原值。,
+                  en: Write this batch into the project? Corrections are possible, deletion is not.}" />
+    </cercis-stack>
+  </cercis-form>
+
+  <cercis-notice tone="info" when-path="$result.dry_run" when-equals="true"
+    value="{zh: 试运行通过，没有写入任何数据。, en: Preview passed — nothing was written.}" />
+  <cercis-notice tone="success" when-path="$result.rows_imported"
+    value="{zh: 已导入 {rows_imported} 行，批次号 {batch_id}。,
+            en: Imported {rows_imported} rows (batch {batch_id}).}" />
+
+  <cercis-section title="{zh: 列映射, en: Column mapping}" when-path="$result.mapping">
+    <cercis-table rows-from="$result.mapping"
+      empty-text="{zh: 没有需要映射的列。, en: Nothing to map.}">
+      <cercis-column name="from" label="{zh: 源列, en: Source}" />
+      <cercis-column name="to" label="{zh: 目标列, en: Target}" />
+    </cercis-table>
+  </cercis-section>
+</cercis-panel>
