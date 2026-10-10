@@ -1,73 +1,82 @@
-# cercis-ui（插件界面规范）
+# cercis-ui (plugin UI specification)
 
-> 愿瑟希斯捍卫你的思想。 / *May Cerces safeguard your thoughts.*
+**English** | [中文](README.zh-CN.md)
 
-Cercis 的**插件界面规范**与配套工具。它回答一个问题：
-**同一个插件界面，怎么在 Mac、Windows、Linux、手机上都用同一份代码，还长得像各自的系统？**
+> May Cerces safeguard your thoughts.
 
-答案不是"把网页翻译成原生"，而是：
+The **plugin UI specification** for Cercis, plus its tooling. It answers one question:
+**how can the same plugin UI run from one piece of code on Mac, Windows, Linux and phones, while
+still looking like each system?**
+
+The answer is not "translate a web page into native widgets", it is:
 
 ```
-插件作者写的 HTML 稿  ──编译器──▶  界面图样（JSON）  ──渲染器──▶  各平台原生界面
-     人看着舒服                        机器读得懂                   用户看着像本地应用
+plugin author's HTML draft  ──compiler──▶  UI blueprint (JSON)  ──renderer──▶  native UI per platform
+        pleasant to write                   machine-readable                    looks native to users
 ```
 
-## 这个仓库有什么
+## What is in this repository
 
-| 目录 | 内容 |
-|------|------|
-| `spec/` | **规范正文** + 图样格式（JSON Schema）+ 官方示例 |
-| `tools/` | 校验器：按 schema 检查图样是否合规（零依赖，只用 Python 标准库） |
-| `compiler/` | 编译器：HTML 稿 → 图样（*规划中*） |
-| `renderers/` | 各平台的"照图施工"程序：网页版 / macOS / Windows / Linux / Android / iOS（*规划中*） |
-| `conformance/` | 一致性验收：同一份图样喂给各渲染器，结构和动作必须一致（*规划中*） |
+| Directory | Content |
+|-----------|---------|
+| `spec/` | **the specification** + the blueprint format (JSON Schema) + official examples |
+| `tools/` | validator: checks a blueprint against the schema (zero dependencies, Python stdlib only) |
+| `compiler/` | compiler: HTML draft → blueprint (*planned*) |
+| `renderers/` | per-platform "build from the blueprint" programs: web / macOS / Windows / Linux / Android / iOS (*planned*) |
+| `conformance/` | conformance testing: feed one blueprint to every renderer; structure and actions must match (*planned*) |
 
-## 谁用这个仓库
+## Who uses it
 
-| 角色 | 怎么用 |
-|------|--------|
-| **插件作者**（官方或第三方） | 照 `spec/v1.md` 写 HTML 稿，用编译器产出图样，交给 app |
-| **app 开发者** | 把图样渲染成该平台的原生控件；负责权限、降级、报错 |
-| **内核** | 不认识界面，只在插件清单里转发"这个插件提供哪些界面" |
+| Role | How |
+|------|-----|
+| **Plugin authors** (official or third-party) | write an HTML draft per `spec/v1.md`, compile it into a blueprint, hand it to the app |
+| **App developers** | render the blueprint with that platform's native controls; own permissions, fallbacks and error messages |
+| **The kernel** | knows nothing about UI; it only relays "which interfaces this plugin offers" in the manifest |
 
-一句话边界：**插件只描述界面，不画界面；app 只画界面，不写业务逻辑。**
+The boundary in one line: **plugins describe the UI, they do not draw it; the app draws the UI, it
+does not implement business logic.**
 
-## 三条路径（插件可选）
+## Three paths (plugins choose)
 
-1. **声明式**（推荐）：写图样 → 所有平台通用，结构一致、控件随平台
-2. **平台原生片段**：某平台自己写原生界面（第三方追求极致体验时用）
-3. **WebView 保底**：复杂可视化、打印预览等直接放网页，宿主内嵌沙箱浏览器
+1. **Declarative** (recommended): write a blueprint → works everywhere, same structure, controls
+   follow the platform
+2. **Platform-native snippets**: hand-written native UI for one platform (for third parties
+   chasing the last 10% of polish)
+3. **WebView fallback**: complex visualisations, print previews and the like stay a web page
+   inside a sandboxed browser view
 
-插件在清单里声明自己走哪条、支持哪些平台；不支持的平台自动隐藏入口，不影响其他功能。
+A plugin declares which path it takes and which platforms it supports; unsupported platforms hide
+the entry point and nothing else breaks.
 
-## 从哪看起
+## Where to start
 
-1. [规范 v1](spec/v1.md) —— 能用哪些"积木"、怎么摆、怎么接数据
-2. [两个真例子](spec/examples/) —— 导入 CSV 向导、体检报告（HTML 稿 + 图样各一份）
-3. [图样格式](spec/schema.json) —— 机器校验用
+1. [specification v1](spec/v1.md) — which building blocks exist, how to arrange them, how to bind data
+2. [two real examples](spec/examples/) — an import-CSV wizard and a health report (HTML draft + blueprint each)
+3. [blueprint format](spec/schema.json) — for machine validation
 
-## 现在就试
+## Try it now
 
 ```bash
-# 校验示例图样是否合规（改坏了会告诉你错在哪一行）
+# validate the example blueprints (a broken file tells you which line is wrong)
 python3 tools/validate.py spec/examples/*.json
 
-# 输出示例：
-# ✓ spec/examples/import-csv.json 通过（13 个组件）
-# ✓ spec/examples/health-report.json 通过（10 个组件）
+# sample output:
+# ✓ spec/examples/import-csv.json passed (13 components)
+# ✓ spec/examples/health-report.json passed (10 components)
 ```
 
-## 状态
+## Status
 
-**v1 草稿**：规范正文、图样格式、验证器、两个示例已就位。
+**v1 draft**: the specification, the blueprint format, the validator and two examples are in place.
 
-下一步（按顺序）：
+Next, in order:
 
-1. **编译器**：`cercis-ui compile import-csv.html -o import-csv.json`（HTML 稿 → 图样）
-2. **网页版渲染器**：让现有桌面 app 能直接渲染图样（替换掉手写的按钮）
-3. **macOS 原生渲染器**：证明"同一份图样 → 原生控件"这条路走得通
-4. **一致性验收**：同一份图样在各渲染器上产出相同的"结构快照"
+1. **Compiler**: `cercis-ui compile import-csv.html -o import-csv.json` (HTML draft → blueprint)
+2. **Web renderer**: let today's desktop app render blueprints directly (replacing hand-written buttons)
+3. **macOS native renderer**: prove that "one blueprint → native controls" really works
+4. **Conformance**: every renderer produces the same "structural snapshot" for the same blueprint
 
-## 许可
+## License
 
-Apache-2.0（见 `LICENSE`）。规范正文可自由引用与实现（含第三方渲染器）。
+Apache-2.0 (see `LICENSE`). The specification text is free to quote and implement (including by
+third-party renderers).
